@@ -3,7 +3,7 @@ using FinalProject_APIServer.Models;
 
 namespace FinalProject_APIServer.Servic
 {
-    public class ServicToTarget
+    public  class ServicToTarget
     {
         private readonly FinalProjectDbContext _dbcontext;
 
@@ -15,59 +15,65 @@ namespace FinalProject_APIServer.Servic
 
         }
 
-        public void MoveTargetOnePlay(string direction, Target? target)
+        public List<int?> MoveTargetOnePlay(string direction, int? x,int? y )
         {
-            if (target != null)
-            {
+            int? x_x = x;
+            int? y_y = y;
+
+            
                 switch (direction)
                 {
                     case "n":
                         {
-                            target.x += 1;
+                            x_x += 1;
                             break;
                         }
                     case "s":
                         {
-                            target.x -= 1;
+                            x_x -= 1;
                             break;
                         }
                     case "w":
                         {
-                            target.y -= 1;
+                            y_y -= 1;
                             break;
                         }
                     case "e":
                         {
-                            target.y += 1;
+                            y_y += 1;
                             break;
                         }
                     case "nw":
                         {
-                            target.y -= 1;
-                            target.x -= 1;
+                            y_y -= 1;
+                            x_x += 1;
                             break;
                         }
                     case "ne":
                         {
-                            target.y += 1;
-                            target.x += 1;
+                            y_y += 1;
+                            x_x += 1;
                             break;
                         }
                     case "sw":
                         {
-                            target.y -= 1;
-                            target.x -= 1;
+                            y_y -= 1;
+                            x_x -= 1;
                             break;
                         }
                     case "se":
                         {
-                            target.y += 1;
-                            target.x -= 1;
+                            y_y += 1;
+                            x_x -= 1;
                             break;
                         }
 
                 }
-                _dbcontext.SaveChanges();
+
+            List<int?> list = new List<int?>();
+            list.Add(x_x);
+            list.Add(y_y);
+            return list;
             }
             
         
@@ -77,4 +83,4 @@ namespace FinalProject_APIServer.Servic
 
 
     }
-}
+

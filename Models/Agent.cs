@@ -10,7 +10,7 @@ namespace FinalProject_APIServer.Models
         public int? id { get; set; }
         public string Nickname { get; set; }
 
-        public byte[]? Image { get; set; }
+        public string? Url_image { get; set; }
 
         [NotMapped]
         public location? Location { get; set; }

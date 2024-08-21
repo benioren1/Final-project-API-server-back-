@@ -16,12 +16,15 @@ namespace FinalProject_APIServer.Controllers
         private readonly FinalProjectDbContext _dbcontext;
 
         private readonly ServicToTarget _servfortarget;
+        //private readonly location _servfortarget;
+
 
         
 
         public TargetController(FinalProjectDbContext freindcontext)
         {
             _dbcontext = freindcontext;
+            _servfortarget = new ServicToTarget(freindcontext);
 
         }
 
@@ -72,65 +75,15 @@ namespace FinalProject_APIServer.Controllers
             Target? thisagent = _dbcontext.targets.FirstOrDefault(att => att.Id == id);
 
             string Direction = moveone.direction;
-            if (thisagent != null)
-            {
-                //_servfortarget.MoveTargetOnePlay(Direction, thisagent);
-                switch (Direction)
-                {
-                    case "n":
-                        {
-                            thisagent.x += 1;
-                            break;
-                        }
-                    case "s":
-                        {
-                            thisagent.x -= 1;
-                            break;
-                        }
-                    case "w":
-                        {
-                            thisagent.y -= 1;
-                            break;
-                        }
-                    case "e":
-                        {
-                            thisagent.y += 1;
-                            break;
-                        }
-                    case "nw":
-                        {
-                            thisagent.y -= 1;
-                            thisagent.x -= 1;
-                            break;
-                        }
-                    case "ne":
-                        {
-                            thisagent.y += 1;
-                            thisagent.x += 1;
-                            break;
-                        }
-                    case "sw":
-                        {
-                            thisagent.y -= 1;
-                            thisagent.x -= 1;
-                            break;
-                        }
-                    case "se":
-                        {
-                            thisagent.y += 1;
-                            thisagent.x -= 1;
-                            break;
-                        }
-                       
-                }
+           
+               List<int?> ints =  _servfortarget.MoveTargetOnePlay(Direction, thisagent.x, thisagent.y);
+
+                thisagent.x = ints[0];
+                thisagent.y = ints[1];
+           
                 await _dbcontext.SaveChangesAsync();
 
                 return StatusCode(StatusCodes.Status200OK, thisagent);
-
-            }
-            else return StatusCode(StatusCodes.Status200OK, thisagent);
-
-
         }
 
 
