@@ -21,6 +21,7 @@ namespace FinalProject_APIServer.DAL
                 Seed();
             }
 
+
         }
 
         public void Seed()
