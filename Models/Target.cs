@@ -1,28 +1,27 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using static System.Net.Mime.MediaTypeNames;
+using System.Security.Policy;
 
 namespace FinalProject_APIServer.Models
 {
-    public class Agent
+    public class Target
     {
-        
-        public int? id { get; set; }
-        public string Nickname { get; set; }
-
-        public byte[]? Image { get; set; }
+        [Key]
+        public int? Id { get; set; }
+        public string Name { get; set; }
+        public string Role { get; set; }
 
         [NotMapped]
         public location? Location { get; set; }
-
         public int? x { get; set; }
 
         public int? y { get; set; }
+        [NotMapped]
+        public string Url_image { get; set; }
 
         public string? Status { get; set; }
-        public Agent() { }
 
-       
+        public Target() { }
+
     }
-
 }
