@@ -80,21 +80,21 @@ namespace FinalProject_APIServer.Servic
 
         public async Task TaskForceCheck(Agent agnet)
         { 
-            var listoftargets = _dbcontext.targets.ToList();
+            var listoftargets = await _dbcontext.targets.Include(t=> t.Location).ToListAsync();
 
             Target thistarget = null;
-            double thisminimum = 0;
+            double thisminimum = 1000;
 
             foreach (var target in listoftargets)
             {
-                
-                double distance = Math.Sqrt(Math.Pow(agnet.x - target.x, 2) + Math.Pow(agnet.y - target.y, 2));
+                if (target.Status == "Live" && target.x != 0 && target.y != 0)
+                {
+                    double distance = Math.Sqrt(Math.Pow(agnet.Location.X - target.Location.X, 2) + Math.Pow(agnet.Location.Y - target.Location.X, 2));
 
                 if (distance <= 200)
                 {
 
-                    if (target.Status == Enums.StatusTarget.Live.ToString())
-                    {
+                    
                         if(distance <= thisminimum)
                         {
                             thisminimum = distance;
@@ -107,7 +107,7 @@ namespace FinalProject_APIServer.Servic
             if (thistarget != null)
             {
 
-                Mission? mission = _dbcontext.missions.FirstOrDefault(p => p.Target.Id == thistarget.Id);
+                Mission? mission = _dbcontext.missions.FirstOrDefault(p => p.Agent.id == thistarget.Id);
                 if (mission != null)
                 {
 

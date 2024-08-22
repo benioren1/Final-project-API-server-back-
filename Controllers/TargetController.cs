@@ -5,13 +5,14 @@ using FinalProject_APIServer.Servic;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Mono.TextTemplating;
 
 namespace FinalProject_APIServer.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
-    public class TargetController : ControllerBase
+    public class TargetsController : ControllerBase
     {
         private readonly FinalProjectDbContext _dbcontext;
 
@@ -21,7 +22,7 @@ namespace FinalProject_APIServer.Controllers
 
         
 
-        public TargetController(FinalProjectDbContext freindcontext)
+        public TargetsController(FinalProjectDbContext freindcontext)
         {
             _dbcontext = freindcontext;
             _servfortarget = new ServicToTarget(freindcontext);
@@ -55,35 +56,49 @@ namespace FinalProject_APIServer.Controllers
         public async Task<IActionResult> UpdateLocation(int id, location loc)
         {
             Target? thistarget =  _dbcontext.targets.FirstOrDefault(att => att.Id == id);
-            thistarget.Location = loc;
-            thistarget.x = loc.X;
-            thistarget.y = loc.Y;
-            _dbcontext.locations.Add(loc);
-            await _dbcontext.SaveChangesAsync();
+
+            if (thistarget != null)
+            {
+                if (thistarget.Location == null)
+                {
+
+                    thistarget.Location = loc;
+                    thistarget.x = thistarget.Location.X;
+                    thistarget.y = thistarget.Location.Y;
+                    _dbcontext.locations.Add(loc);
+                    await _dbcontext.SaveChangesAsync();
+                    await _servfortarget.TaskForceCheck(thistarget);
+                   
+                }
+            }
 
             return StatusCode(StatusCodes.Status200OK, thistarget);
-
-
-
         }
 
 
-
+        //הוזזת מטרה בצעד אחד לפי דרישה משרת
         [HttpPut("{id}/move")]
         public async Task<IActionResult> MovingTarget(int id, MoveTarget moveone)
         {
-            Target? thisagent = _dbcontext.targets.FirstOrDefault(att => att.Id == id);
+            Target? thistargrt = _dbcontext.targets.Include(t=> t.Location).FirstOrDefault(att => att.Id == id);
 
             string Direction = moveone.direction;
-           
-               List<int> ints =  _servfortarget.MoveTargetOnePlay(Direction, thisagent.x, thisagent.y);
 
-                thisagent.x = ints[0];
-                thisagent.y = ints[1];
-           
+            if (thistargrt != null)
+            {
+                if (thistargrt.Location != null)
+                {
+                    List<int> ints = _servfortarget.MoveTargetOnePlay(Direction, thistargrt.Location.X, thistargrt.Location.Y);
+
+                    thistargrt.x = ints[0];
+                    thistargrt.y = ints[1];
+                    thistargrt.Location.X = ints[0];
+                    thistargrt.Location.Y = ints[1];
+                }
+            }
+
                 await _dbcontext.SaveChangesAsync();
-
-                return StatusCode(StatusCodes.Status200OK, thisagent);
+                return StatusCode(StatusCodes.Status200OK, thistargrt);
         }
 
 

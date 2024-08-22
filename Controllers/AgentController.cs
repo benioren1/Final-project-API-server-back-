@@ -4,18 +4,19 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Mono.TextTemplating;
 using FinalProject_APIServer.Servic;
+using Microsoft.EntityFrameworkCore;
 
 namespace FinalProject_APIServer.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
-    public class AgentController : ControllerBase
+    public class AgentsController : ControllerBase
     {
         // מזריק לקונטרולר את החיבור לדאטה בייס
         private readonly FinalProjectDbContext _dbcontext;
         private readonly  ServicToAgent _servtoagent;
 
-        public AgentController(FinalProjectDbContext freindcontext)
+        public AgentsController(FinalProjectDbContext freindcontext)
         {
             _dbcontext = freindcontext;
             _servtoagent = new ServicToAgent(freindcontext);
@@ -40,6 +41,7 @@ namespace FinalProject_APIServer.Controllers
             agent.Status = Enums.StatusAgent.Dormant.ToString();
             var result = await _dbcontext.agnets.AddAsync(agent);
             await _dbcontext.SaveChangesAsync();
+            
             return StatusCode(StatusCodes.Status201Created, result.Entity);
         }
 
@@ -48,15 +50,25 @@ namespace FinalProject_APIServer.Controllers
         public async Task<IActionResult> UpdateLocation(int id, location loc)
         {
             Agent? thisagent = _dbcontext.agnets.FirstOrDefault(att => att.id == id);
-            thisagent.Location = loc;
-            thisagent.x = loc.X;
-            thisagent.y = loc.Y;
-            _dbcontext.locations.Add(loc);
-            await _dbcontext.SaveChangesAsync();
+
+            if (thisagent != null)
+            {
+                if(thisagent.Location ==null)
+                {
+                    thisagent.Location = loc;
+                    thisagent.X = thisagent.Location.X;
+                    thisagent.Y = thisagent.Location.Y;
+                    _dbcontext.locations.Add(loc);
+                    await _dbcontext.SaveChangesAsync();
 
 
-           await _servtoagent.TaskForceCheck(thisagent);
+                    await _servtoagent.TaskForceCheck(thisagent);
+                }
+            }
+                
 
+
+         
             return StatusCode(StatusCodes.Status200OK, thisagent);
 
         }
@@ -66,15 +78,26 @@ namespace FinalProject_APIServer.Controllers
         [HttpPut("{id}/move")]  
         public async Task<IActionResult> MovingTarget(int id, MoveTarget moveone)
         {
-            Agent? thisagent = _dbcontext.agnets.FirstOrDefault(att => att.id == id);
+            Agent? thisagent = _dbcontext.agnets.Include(t => t.Location).FirstOrDefault(att => att.id == id);
 
             string Direction = moveone.direction;
+            if (thisagent != null)
+            {
+                //קריאה לפונקציה של שתבדוק לאיפה להוזיז את הסוכן ותחזיר לי את הערך החדש של המיקום
+                if (thisagent.Location != null && thisagent.Location != null)
+                {
+                    List<int> ints = _servtoagent.MoveTargetOnePlay(Direction, thisagent.Location.X, thisagent.Location.Y);
+                    thisagent.X = ints[0];
+                    thisagent.Y = ints[1];
+                    thisagent.Location.X = ints[0];
+                    thisagent.Location.Y = ints[1];
+                }
+            }
+           
+           
+            
 
-            //קריאה לפונקציה של שתבדוק לאיפה להוזיז את הסוכן ותחזיר לי את הערך החדש של המיקום
-            List<int> ints = _servtoagent.MoveTargetOnePlay(Direction, thisagent.x, thisagent.y);
-
-            thisagent.x = ints[0];
-            thisagent.y = ints[1];
+            
 
             await _dbcontext.SaveChangesAsync();
 
