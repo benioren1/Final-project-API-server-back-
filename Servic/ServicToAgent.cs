@@ -1,4 +1,6 @@
 ﻿using FinalProject_APIServer.DAL;
+using FinalProject_APIServer.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace FinalProject_APIServer.Servic
 {
@@ -14,10 +16,10 @@ namespace FinalProject_APIServer.Servic
 
         }
 
-        public List<int?> MoveTargetOnePlay(string direction, int? x, int? y)
+        public List<int> MoveTargetOnePlay(string direction, int x, int y)
         {
-            int? x_x = x;
-            int? y_y = y;
+            int x_x = x;
+            int y_y = y;
 
 
             switch (direction)
@@ -69,15 +71,67 @@ namespace FinalProject_APIServer.Servic
 
             }
 
-            List<int?> list = new List<int?>();
+            List<int> list = new List<int>();
             list.Add(x_x);
             list.Add(y_y);
             return list;
         }
 
 
+        public async Task TaskForceCheck(Agent agnet)
+        { 
+            var listoftargets = _dbcontext.targets.ToList();
+
+            Target thistarget = null;
+            double thisminimum = 0;
+
+            foreach (var target in listoftargets)
+            {
+                
+                double distance = Math.Sqrt(Math.Pow(agnet.x - target.x, 2) + Math.Pow(agnet.y - target.y, 2));
+
+                if (distance <= 200)
+                {
+
+                    if (target.Status == Enums.StatusTarget.Live.ToString())
+                    {
+                        if(distance <= thisminimum)
+                        {
+                            thisminimum = distance;
+                            thistarget = target;
+                        } 
+                    }
+                }
+            }
+
+            if (thistarget != null)
+            {
+
+                Mission? mission = _dbcontext.missions.FirstOrDefault(p => p.Target.Id == thistarget.Id);
+                if (mission != null)
+                {
+
+                    mission.Target = thistarget;
+                    _dbcontext.missions.Update(mission);
+                    _dbcontext.SaveChanges();
+                }
+                else
+                {
+                    Mission newmission = new Mission()
+                    {
+                        Agent = agnet,
+                        Target = thistarget,
+                        Status = Enums.StatusMission.Proposal.ToString(),
+                    };
+                    _dbcontext.missions.Add(newmission);
+                    _dbcontext.SaveChanges();
+
+                }
+            }
+        }
 
 
-    }
-}
+    } 
+
+ }
 

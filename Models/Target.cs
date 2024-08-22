@@ -13,9 +13,9 @@ namespace FinalProject_APIServer.Models
 
         [NotMapped]
         public location? Location { get; set; }
-        public int? x { get; set; }
+        public int x { get; set; } = 0;
 
-        public int? y { get; set; }
+        public int y { get; set; } = 0;
         [NotMapped]
         public string Url_image { get; set; }
 

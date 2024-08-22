@@ -76,7 +76,7 @@ namespace FinalProject_APIServer.Controllers
 
             string Direction = moveone.direction;
            
-               List<int?> ints =  _servfortarget.MoveTargetOnePlay(Direction, thisagent.x, thisagent.y);
+               List<int> ints =  _servfortarget.MoveTargetOnePlay(Direction, thisagent.x, thisagent.y);
 
                 thisagent.x = ints[0];
                 thisagent.y = ints[1];

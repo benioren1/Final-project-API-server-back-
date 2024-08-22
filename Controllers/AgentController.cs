@@ -54,20 +54,24 @@ namespace FinalProject_APIServer.Controllers
             _dbcontext.locations.Add(loc);
             await _dbcontext.SaveChangesAsync();
 
+
+           await _servtoagent.TaskForceCheck(thisagent);
+
             return StatusCode(StatusCodes.Status200OK, thisagent);
 
         }
 
 
         //הוזזת סוכן מקום אחד
-        [HttpPut("{id}/move")]
+        [HttpPut("{id}/move")]  
         public async Task<IActionResult> MovingTarget(int id, MoveTarget moveone)
         {
             Agent? thisagent = _dbcontext.agnets.FirstOrDefault(att => att.id == id);
 
             string Direction = moveone.direction;
 
-            List<int?> ints = _servtoagent.MoveTargetOnePlay(Direction, thisagent.x, thisagent.y);
+            //קריאה לפונקציה של שתבדוק לאיפה להוזיז את הסוכן ותחזיר לי את הערך החדש של המיקום
+            List<int> ints = _servtoagent.MoveTargetOnePlay(Direction, thisagent.x, thisagent.y);
 
             thisagent.x = ints[0];
             thisagent.y = ints[1];

@@ -6,11 +6,12 @@ namespace FinalProject_APIServer.Models
     public class Mission
     {
         [Key]
-        public int Id { get; set; }
-        public int Agent_id { get; set; }
-        public int Target_id { get; set; }
-        public int time_left { get; set; }
-        public DateTime At_Time { get; set; }
+        public int? Id { get; set; }
+        public Agent Agent { get; set; }
+        public Target Target { get; set; }
+        public int? Time_left { get; set; }
+        public DateTime? At_Time { get; set; }
+        public string Status { get; set; }
         public Mission() { }
     }
 }

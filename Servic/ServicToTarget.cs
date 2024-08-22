@@ -15,10 +15,10 @@ namespace FinalProject_APIServer.Servic
 
         }
 
-        public List<int?> MoveTargetOnePlay(string direction, int? x,int? y )
+        public List<int> MoveTargetOnePlay(string direction, int x,int y )
         {
-            int? x_x = x;
-            int? y_y = y;
+            int x_x = x;
+            int y_y = y;
 
             
                 switch (direction)
@@ -70,7 +70,7 @@ namespace FinalProject_APIServer.Servic
 
                 }
 
-            List<int?> list = new List<int?>();
+            List<int> list = new List<int>();
             list.Add(x_x);
             list.Add(y_y);
             return list;

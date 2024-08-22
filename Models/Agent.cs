@@ -10,14 +10,14 @@ namespace FinalProject_APIServer.Models
         public int? id { get; set; }
         public string Nickname { get; set; }
 
-        public string? Url_image { get; set; }
+        public string? Image { get; set; }
 
         [NotMapped]
         public location? Location { get; set; }
 
-        public int? x { get; set; }
+        public int x { get; set; } = 0;
 
-        public int? y { get; set; }
+        public int y { get; set; } = 0;
 
         public string? Status { get; set; }
         public Agent() { }
