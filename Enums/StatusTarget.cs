@@ -3,6 +3,7 @@
     public enum StatusTarget
     {
         Live,
+        Mitzvah,
         Eliminated,
 
     }

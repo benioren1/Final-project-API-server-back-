@@ -61,13 +61,17 @@ namespace FinalProject_APIServer.Controllers
             {
                 if (thistarget.Location == null)
                 {
+                    if (loc.X <= 1000 && loc.Y <= 1000 && loc.X >= 0 && loc.Y >= 0)
+                    {
+                        thistarget.Location = loc;
+                        thistarget.x = thistarget.Location.X;
+                        thistarget.y = thistarget.Location.Y;
+                        _dbcontext.locations.Add(loc);
+                        await _dbcontext.SaveChangesAsync();
+                        await _servfortarget.TaskForceCheck(thistarget);
+                    }
 
-                    thistarget.Location = loc;
-                    thistarget.x = thistarget.Location.X;
-                    thistarget.y = thistarget.Location.Y;
-                    _dbcontext.locations.Add(loc);
-                    await _dbcontext.SaveChangesAsync();
-                    await _servfortarget.TaskForceCheck(thistarget);
+                    
                    
                 }
             }
@@ -86,6 +90,11 @@ namespace FinalProject_APIServer.Controllers
 
             if (thistargrt != null)
             {
+                if (await _servfortarget.OutOfRAnge(thistargrt))
+                {
+                    return StatusCode(StatusCodes.Status400BadRequest, new { eror = $"this agent out of range; : P{thistargrt.x} , {thistargrt.x}" });
+
+                }
                 if (thistargrt.Location != null)
                 {
                     List<int> ints = _servfortarget.MoveTargetOnePlay(Direction, thistargrt.Location.X, thistargrt.Location.Y);
@@ -95,6 +104,7 @@ namespace FinalProject_APIServer.Controllers
                     thistargrt.Location.X = ints[0];
                     thistargrt.Location.Y = ints[1];
                 }
+                await _servfortarget.MoveTarget(thistargrt);
             }
 
                 await _dbcontext.SaveChangesAsync();

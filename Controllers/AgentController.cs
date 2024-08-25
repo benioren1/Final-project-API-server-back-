@@ -80,26 +80,39 @@ namespace FinalProject_APIServer.Controllers
         {
             Agent? thisagent = _dbcontext.agnets.Include(t => t.Location).FirstOrDefault(att => att.id == id);
 
+            
+
             string Direction = moveone.direction;
             if (thisagent != null)
             {
-                //קריאה לפונקציה של שתבדוק לאיפה להוזיז את הסוכן ותחזיר לי את הערך החדש של המיקום
-                if (thisagent.Location != null && thisagent.Location != null)
+                if (await _servtoagent.OutOfRAnge(thisagent))
                 {
-                    List<int> ints = _servtoagent.MoveTargetOnePlay(Direction, thisagent.Location.X, thisagent.Location.Y);
-                    thisagent.X = ints[0];
-                    thisagent.Y = ints[1];
-                    thisagent.Location.X = ints[0];
-                    thisagent.Location.Y = ints[1];
+                    return StatusCode(StatusCodes.Status400BadRequest, new { eror = $"this agent out of range; : P{thisagent.X} , {thisagent.Y}" });
+                
+                }
+                //האם הסוכן בפעילות כבר
+                if (thisagent.Status == Enums.StatusAgent.In_Activity.ToString())
+                {
+
+                    return StatusCode(StatusCodes.Status400BadRequest, new { eror = "this agent in activity" });
+                }
+
+                else
+                {
+                    //קריאה לפונקציה של שתבדוק לאיפה להוזיז את הסוכן ותחזיר לי את הערך החדש של המיקום
+                    if (thisagent.Location != null && thisagent.Location != null)
+                    {
+                        List<int> ints = _servtoagent.MoveTargetOnePlay(Direction, thisagent.Location.X, thisagent.Location.Y);
+                        thisagent.X = ints[0];
+                        thisagent.Y = ints[1];
+                        thisagent.Location.X = ints[0];
+                        thisagent.Location.Y = ints[1];
+                    }
+                    await _servtoagent.MoveAgent(thisagent);
                 }
             }
-           
-           
-            
-
-            
-
             await _dbcontext.SaveChangesAsync();
+            
 
             return StatusCode(StatusCodes.Status200OK, thisagent);
         }

@@ -1,6 +1,8 @@
 ﻿using FinalProject_APIServer.DAL;
 using FinalProject_APIServer.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NuGet.ContentModel;
 
 namespace FinalProject_APIServer.Servic
 {
@@ -78,44 +80,57 @@ namespace FinalProject_APIServer.Servic
         }
 
 
+
+        public  double Distance(int x, int x1, int y, int y1)
+        {
+            return Math.Sqrt(Math.Pow(x - x1, 2) + Math.Pow(y - y1, 2));
+           
+        }
+
         public async Task TaskForceCheck(Agent agnet)
-        { 
-            var listoftargets = await _dbcontext.targets.Include(t=> t.Location).ToListAsync();
+        {
+            var listoftargets = await _dbcontext.targets.Include(t => t.Location).ToListAsync();
 
             Target thistarget = null;
             double thisminimum = 1000;
 
             foreach (var target in listoftargets)
             {
-                if (target.Status == "Live" && target.x != 0 && target.y != 0)
-                {
-                    double distance = Math.Sqrt(Math.Pow(agnet.Location.X - target.Location.X, 2) + Math.Pow(agnet.Location.Y - target.Location.X, 2));
-
-                if (distance <= 200)
+                if (target.Status == "Live" && target.Location != null && agnet.Location != null)
                 {
 
-                    
-                        if(distance <= thisminimum)
+                    double distance = Math.Sqrt(Math.Pow(agnet.Location.X - target.Location.X, 2) + Math.Pow(agnet.Location.Y - target.Location.Y, 2));
+
+                    if (distance <= 200)
+                    {
+
+
+                        if (distance <= thisminimum)
                         {
                             thisminimum = distance;
                             thistarget = target;
-                        } 
+                        }
                     }
                 }
             }
-
             if (thistarget != null)
             {
 
-                Mission? mission = _dbcontext.missions.FirstOrDefault(p => p.Agent.id == thistarget.Id);
-                if (mission != null)
+                Mission? mission = _dbcontext.missions.FirstOrDefault(p => p.Target.Id == thistarget.Id);
+                if (mission == null)
+
                 {
 
-                    mission.Target = thistarget;
-                    _dbcontext.missions.Update(mission);
+                    Mission newmission = new Mission()
+                    {
+                        Agent = agnet,
+                        Target = thistarget,
+                        Status = Enums.StatusMission.Proposal.ToString(),
+                    };
+                    _dbcontext.missions.Add(newmission);
                     _dbcontext.SaveChanges();
                 }
-                else
+                if (mission != null && mission.Status == Enums.StatusMission.Proposal.ToString() && mission.Target.Id != thistarget.Id)
                 {
                     Mission newmission = new Mission()
                     {
@@ -130,8 +145,44 @@ namespace FinalProject_APIServer.Servic
             }
         }
 
+        public async Task MoveAgent(Agent agent)
+        {
 
-    } 
+            var missions = await _dbcontext.missions.Include(a => a.Agent).ThenInclude(l=>l.Location).Include(t => t.Target).ThenInclude(l => l.Location).Where(p => p.Status == Enums.StatusMission.Proposal.ToString()).ToListAsync();
+            List<Mission> newmission = new List<Mission>();
+            
+            if (missions != null)
+            {
+                foreach (var mission in missions)
+                {
 
- }
+                    if (mission.Agent.id == agent.id)
+                    {
+
+                        if (Distance(agent.Location.X, mission.Target.x, agent.Location.Y, mission.Target.y) > 200)
+                        {
+                            _dbcontext.missions.Remove(mission);
+                            _dbcontext.SaveChanges();
+
+                        }
+                    }
+                }
+            }
+            await TaskForceCheck(agent);
+
+        }
+
+        public async Task<bool> OutOfRAnge(Agent agent)
+        {
+            if (agent.X > 1000 || agent.Y > 1000  || agent.Y < 0 || agent.X < 0)
+            {
+                return true;
+
+            }
+            
+            return false;
+        }
+
+    }
+}
 
