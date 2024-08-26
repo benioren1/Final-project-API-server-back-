@@ -15,7 +15,7 @@
         public int Ytarget { get; set; }
 
         public double distanc {  get; set; }
-        public int? Time_left { get; set; }
+        public double Time_left { get; set; }
         
         public string Status { get; set; }
 

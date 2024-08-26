@@ -42,7 +42,7 @@ namespace FinalProject_APIServer.Controllers
 
         //יצירת מטרה חדש
         [HttpPost]
-        public async Task<IActionResult> AddAgent(Target target)
+        public async Task<IActionResult> AddTarget(Target target)
         {
 
             var result = await _dbcontext.targets.AddAsync(target);
@@ -55,24 +55,44 @@ namespace FinalProject_APIServer.Controllers
         [HttpPut("{id}/pin")]
         public async Task<IActionResult> UpdateLocation(int id, location loc)
         {
-            Target? thistarget =  _dbcontext.targets.FirstOrDefault(att => att.Id == id);
+            var thistarget = await _dbcontext.targets
+                .Include(t => t.Location)
+                .FirstOrDefaultAsync(att => att.Id == id);
 
             if (thistarget != null)
             {
                 if (thistarget.Location == null)
                 {
-                    if (loc.X <= 1000 && loc.Y <= 1000 && loc.X >= 0 && loc.Y >= 0)
+                    
+                    thistarget.Location = loc;
+                    thistarget.x = thistarget.Location.X;
+                    thistarget.y = thistarget.Location.Y;
+
+                    if (thistarget.x >= 0 && thistarget.y >= 0)
                     {
-                        thistarget.Location = loc;
-                        thistarget.x = thistarget.Location.X;
-                        thistarget.y = thistarget.Location.Y;
-                        _dbcontext.locations.Add(loc);
+                        await _dbcontext.locations.AddAsync(thistarget.Location);
                         await _dbcontext.SaveChangesAsync();
+
+                       
                         await _servfortarget.TaskForceCheck(thistarget);
                     }
+                }
+                else
+                {
+                
+                    thistarget.Location.X = loc.X;
+                    thistarget.Location.Y = loc.Y;
+                    thistarget.x = thistarget.Location.X;
+                    thistarget.y = thistarget.Location.Y;
 
-                    
                    
+                    _dbcontext.targets.Update(thistarget);
+                    _dbcontext.locations.Update(thistarget.Location);
+
+                    await _dbcontext.SaveChangesAsync();
+
+                    //שליחה של הסוכן לבדיקה של האיזור שלו לביצוע חיבור משימה
+                    await _servfortarget.TaskForceCheck(thistarget);
                 }
             }
 
@@ -80,35 +100,42 @@ namespace FinalProject_APIServer.Controllers
         }
 
 
+
         //הוזזת מטרה בצעד אחד לפי דרישה משרת
         [HttpPut("{id}/move")]
         public async Task<IActionResult> MovingTarget(int id, MoveTarget moveone)
         {
+            
             Target? thistargrt = _dbcontext.targets.Include(t=> t.Location).FirstOrDefault(att => att.Id == id);
-
-            string Direction = moveone.direction;
-
             if (thistargrt != null)
             {
-                if (await _servfortarget.OutOfRAnge(thistargrt))
+                if (thistargrt.Status == Enums.StatusTarget.Live.ToString())
                 {
-                    return StatusCode(StatusCodes.Status400BadRequest, new { eror = $"this agent out of range; : P{thistargrt.x} , {thistargrt.x}" });
+                    string Direction = moveone.direction;
 
-                }
-                if (thistargrt.Location != null)
-                {
-                    List<int> ints = _servfortarget.MoveTargetOnePlay(Direction, thistargrt.Location.X, thistargrt.Location.Y);
+                    //בדיקה שהוא לא מחוץ לטווח
+                    if (await _servfortarget.OutOfRAnge(thistargrt))
+                    {
+                        return StatusCode(StatusCodes.Status400BadRequest, new { eror = $"this agent out of range; : P{thistargrt.x} , {thistargrt.x}" });
 
-                    thistargrt.x = ints[0];
-                    thistargrt.y = ints[1];
-                    thistargrt.Location.X = ints[0];
-                    thistargrt.Location.Y = ints[1];
+                    }
+                    if (thistargrt.Location != null)
+                    {//הוזזת מטרה לכיוון לפי בחירה של סימולאציה
+                        List<int> ints = _servfortarget.MoveTargetOnePlay(Direction, thistargrt.Location.X, thistargrt.Location.Y);
+
+                        thistargrt.x = ints[0];
+                        thistargrt.y = ints[1];
+                        thistargrt.Location.X = ints[0];
+                        thistargrt.Location.Y = ints[1];
+                    }
+                    await _servfortarget.MoveTarget(thistargrt);
+
+
+                    await _dbcontext.SaveChangesAsync();
+                    return StatusCode(StatusCodes.Status200OK, thistargrt);
                 }
-                await _servfortarget.MoveTarget(thistargrt);
             }
-
-                await _dbcontext.SaveChangesAsync();
-                return StatusCode(StatusCodes.Status200OK, thistargrt);
+            return NoContent();
         }
 
 

@@ -6,7 +6,7 @@ namespace FinalProject_APIServer.Models
 {
     public class Agent
     {
-        
+        [Key]
         public int? id { get; set; }
         public string Nickname { get; set; }
 

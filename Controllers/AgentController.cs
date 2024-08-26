@@ -25,10 +25,14 @@ namespace FinalProject_APIServer.Controllers
 
         //הצגת כל הסוכנים
         [HttpGet]
-        public async Task<IEnumerable<Agent>> GetAllAgents()
+        public async Task<IEnumerable<ViewAgent>> GetAllAgents()
         {
 
-            return _dbcontext.agnets.ToList();
+
+              var agents =await _servtoagent.ShwoAllAgents();
+                
+                
+              return agents;
 
         }
 
@@ -43,7 +47,7 @@ namespace FinalProject_APIServer.Controllers
             var result = await _dbcontext.agnets.AddAsync(agent);
             await _dbcontext.SaveChangesAsync();
             
-            return StatusCode(StatusCodes.Status201Created, result.Entity);
+            return StatusCode(StatusCodes.Status201Created,new { result.Entity.id });
         }
 
         //עדכון מיקום של סוכן
@@ -105,10 +109,14 @@ namespace FinalProject_APIServer.Controllers
                     if (thisagent.Location != null && thisagent.Location != null)
                     {
                         List<int> ints = _servtoagent.MoveTargetOnePlay(Direction, thisagent.Location.X, thisagent.Location.Y);
-                        thisagent.X = ints[0];
-                        thisagent.Y = ints[1];
-                        thisagent.Location.X = ints[0];
-                        thisagent.Location.Y = ints[1];
+                        if (await _servtoagent.OutOfRAnge(thisagent))
+                        {
+                            thisagent.X = ints[0];
+                            thisagent.Y = ints[1];
+                            thisagent.Location.X = ints[0];
+                            thisagent.Location.Y = ints[1];
+                        }
+                        
                     }
                     await _servtoagent.MoveAgent(thisagent);
                 }

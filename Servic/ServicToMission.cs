@@ -22,11 +22,13 @@ namespace FinalProject_APIServer.Servic
         public async Task MoveMission()
         {
             var missions = await _dbcontext.missions
-                .AsNoTracking() 
-                .Include(a => a.Agent).ThenInclude(l => l.Location)
-                .Include(t => t.Target).ThenInclude(t => t.Location)
-                .Where(t => t.Status == Enums.StatusMission.Conected_to_mission.ToString())
-                .ToListAsync();
+       .AsNoTracking() 
+       .Include(m => m.Agent)
+           .ThenInclude(a => a.Location)
+       .Include(m => m.Target)
+           .ThenInclude(t => t.Location)
+       .Where(m => m.Status == Enums.StatusMission.Conected_to_mission.ToString())
+       .ToListAsync();
 
             foreach (var mission in missions)
             {
@@ -65,6 +67,12 @@ namespace FinalProject_APIServer.Servic
 
         }
 
+        public double DistanceTime(int x, int x1, int y, int y1)
+        {
+            return (Math.Sqrt(Math.Pow(x - x1, 2) + Math.Pow(y - y1, 2))) / 5.0;
+
+        }
+
         //בדיקה האם המטרה חוסלה
         public async Task FinishTheMission(Mission mission)
         {
@@ -77,10 +85,13 @@ namespace FinalProject_APIServer.Servic
                     mission.Status = Enums.StatusMission.Ended.ToString();
                     mission.Target.Status = Enums.StatusTarget.Eliminated.ToString();
                     mission.Agent.Status = Enums.StatusAgent.Dormant.ToString();
+                    _dbcontext.Update(mission);
+                    _dbcontext.targets.Update(mission.Target);
+                    _dbcontext.agnets.Update(mission.Agent);
                 }
               
             }
-            _dbcontext.Update(mission);
+            
 
             await _dbcontext.SaveChangesAsync();
         }

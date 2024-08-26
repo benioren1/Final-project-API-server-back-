@@ -1,4 +1,5 @@
-﻿using FinalProject_APIServer.DAL;
+﻿using System.Reflection;
+using FinalProject_APIServer.DAL;
 using FinalProject_APIServer.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -87,17 +88,22 @@ namespace FinalProject_APIServer.Servic
 
 
 
-        public  double Distance(int x, int x1, int y, int y1)
+        public double Distance(int x, int x1, int y, int y1)
         {
             return Math.Sqrt(Math.Pow(x - x1, 2) + Math.Pow(y - y1, 2));
-           
+
+        }
+        public double DistanceTime(int x, int x1, int y, int y1)
+        {
+            return (Math.Sqrt(Math.Pow(x - x1, 2) + Math.Pow(y - y1, 2))) /5.0;
+
         }
 
         public async Task TaskForceCheck(Agent agnet)
         {
-            var listoftargets = await _dbcontext.targets.Include(t => t.Location).ToListAsync();
+            var listoftargets = await _dbcontext.targets.Include(t => t.Location).Where(s=>s.Status == Enums.StatusTarget.Live.ToString()). ToListAsync();
 
-            Target thistarget = null;
+
             double thisminimum = 1000;
 
             foreach (var target in listoftargets)
@@ -114,43 +120,42 @@ namespace FinalProject_APIServer.Servic
                         if (distance <= thisminimum)
                         {
                             thisminimum = distance;
-                            thistarget = target;
+                            Mission? mission = _dbcontext.missions.FirstOrDefault(p => p.Target.Id == target.Id && p.Agent.id == agnet.id);
+                            if (mission == null)
+
+                            {
+
+                                Mission newmission = new Mission()
+                                {
+                                    Agent = agnet,
+                                    Target = target,
+                                    Status = Enums.StatusMission.Proposal.ToString(),
+                                };
+                                await _dbcontext.missions.AddAsync(newmission);
+
+
+                            }
                         }
                     }
                 }
-                if (thistarget != null)
-                {
-
-                    Mission? mission = _dbcontext.missions.FirstOrDefault(p => p.Target.Id == thistarget.Id);
-                    if (mission == null)
-
-                    {
-
-                        Mission newmission = new Mission()
-                        {
-                            Agent = agnet,
-                            Target = thistarget,
-                            Status = Enums.StatusMission.Proposal.ToString(),
-                        };
-                       await _dbcontext.missions.AddAsync(newmission);
 
 
-                    }
-                    if (mission != null && mission.Status == Enums.StatusMission.Proposal.ToString() && mission.Target.Id != thistarget.Id)
-                    {
-                        Mission newmission = new Mission()
-                        {
-                            Agent = agnet,
-                            Target = thistarget,
-                            Status = Enums.StatusMission.Proposal.ToString(),
-                        };
-                       await _dbcontext.missions.AddAsync(newmission);
+                
+                //if (mission != null && mission.Status == Enums.StatusMission.Proposal.ToString())
+                //{
+                //    Mission newmission = new Mission()
+                //    {
+                //        Agent = agnet,
+                //        Target = target,
+                //        Status = Enums.StatusMission.Proposal.ToString(),
+                //    };
+                //    await _dbcontext.missions.AddAsync(newmission);
 
-                       
 
-                    }
-                }
+
+                //}
             }
+        
             await _dbcontext.SaveChangesAsync();
 
         }
@@ -194,6 +199,30 @@ namespace FinalProject_APIServer.Servic
             return false;
         }
 
+        public async Task<List< ViewAgent>> ShwoAllAgents()
+        {
+            var listagents =await _dbcontext.agnets.Include(l=> l.Location).ToListAsync();
+            List<ViewAgent> agentss = new List<ViewAgent>();
+            foreach (var agent in listagents)
+            { 
+            
+            ViewAgent viewAgent = new ViewAgent();
+                viewAgent.id = agent.id;
+                viewAgent.Nickname = agent.Nickname;
+                viewAgent.X = agent.Location.X;
+                viewAgent.Y = agent.Location.Y;
+                viewAgent.Status = agent.Status;
+                if(agent.Status == "In_Activity")
+                {
+                    var mission = await _dbcontext.missions.Include(a => a.Agent).ThenInclude(l => l.Location).Include(t => t.Target).ThenInclude(l => l.Location).FirstOrDefaultAsync(i => i.Agent.id == agent.id);
+                    viewAgent.Time_left = DistanceTime(mission.Target.Location.X, mission.Agent.Location.X, mission.Target.Location.Y, mission.Agent.Location.Y);
+                }
+                var mission1 =  _dbcontext.missions.Include(a => a.Agent).ThenInclude(l => l.Location).Include(t => t.Target).ThenInclude(l => l.Location).Where(i => i.Agent.id == agent.id && i.Status == "Ended").Count();
+                viewAgent.Amount_Of_Eliminations = mission1;
+                agentss.Add(viewAgent);
+            }
+            return agentss;
+        }
     }
 }
 

@@ -17,8 +17,14 @@ namespace FinalProject_APIServer.DAL
         public FinalProjectDbContext(DbContextOptions<FinalProjectDbContext> options)
             : base(options)
         {
+            try
+            {
+                Console.WriteLine("Database Exists: " + Database.EnsureCreated());
 
-            Console.WriteLine("Database Exists: " + Database.EnsureCreated());
+            } catch (Exception ex)
+            {
+                    Console.WriteLine(ex.Message);
+            }
 
             if (agnets?.Count() == 0)
             {

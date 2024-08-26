@@ -81,10 +81,10 @@ namespace FinalProject_APIServer.Servic
         {
             var listofagents = await _dbcontext.agnets
                 .AsNoTracking()
-                .Include(t => t.Location)
+                .Include(t => t.Location).Where(s=>s.Status==Enums.StatusAgent.Dormant.ToString())
                 .ToListAsync();
 
-            Agent thisagent = null;
+            
             double thisminimum = 1000;
 
             foreach (var agent in listofagents)
@@ -93,30 +93,29 @@ namespace FinalProject_APIServer.Servic
                 {
                     double distance = Math.Sqrt(Math.Pow(target.Location.X - agent.Location.X, 2) + Math.Pow(target.Location.Y - agent.Location.Y, 2));
 
-                    if (distance <= 200 && distance < thisminimum)
+                    if (distance <= 200)
                     {
                         thisminimum = distance;
-                        thisagent = agent;
-                    }
-                }
-                if (thisagent != null)
-                {
-                    Mission? mission = await _dbcontext.missions
-                        .FirstOrDefaultAsync(i => i.Target.Id == target.Id && i.Agent.id == thisagent.id);
-
-                    if (mission == null)
-                    {
-                        Mission newmission = new Mission()
-                        {
-                            Agent = thisagent,
-                            Target = target,
-                            Status = Enums.StatusMission.Proposal.ToString(),
-                        };
-                        await _dbcontext.missions.AddAsync(newmission);
-                        
                        
+                            Mission? mission = await _dbcontext.missions
+                                .FirstOrDefaultAsync(i => i.Target.Id == target.Id && i.Agent.id == agent.id);
+
+                            if (mission == null)
+                            {
+                                Mission newmission = new Mission()
+                                {
+                                    Agent = agent,
+                                    Target = target,
+                                    Status = Enums.StatusMission.Proposal.ToString(),
+                                };
+                                await _dbcontext.missions.AddAsync(newmission);
+
+
+                            }
                     }
-                }
+                 }
+                
+                
             }
             await _dbcontext.SaveChangesAsync();
 

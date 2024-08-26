@@ -36,7 +36,7 @@ namespace FinalProject_APIServer.Controllers
                     }
 
                     ),
-                Expires = DateTime.Now.AddSeconds(160),
+                Expires = DateTime.Now.AddMinutes(10),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key),
                 SecurityAlgorithms.HmacSha256Signature
 
@@ -56,16 +56,23 @@ namespace FinalProject_APIServer.Controllers
         [HttpPost]
         public IActionResult Login(Loggin loggin)
         {
+            if (loggin.id == "MvcServer" ||
+                loggin.id == "SimulationServer")
+            {
+                string userIP = HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString();
 
 
-            string userIP = HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString();
+                UserTokens[loggin.id] = GenerateToken(userIP);
 
+                return StatusCode(200
+                    , new { token = GenerateToken(userIP) }
+                    );
 
-            UserTokens[loggin.id] = GenerateToken(userIP);
+            }
+            return StatusCode(StatusCodes.Status401Unauthorized,
+                    new { error = "invalid credentials" });
 
-            return StatusCode(200
-                , new { token = GenerateToken(userIP) }
-                );
+            
             
 
 

@@ -22,6 +22,7 @@ namespace FinalProject_APIServer.Controllers
             _servtomis = new ServicToMission(freindcontext);
         }
 
+        //הצגת כל המשימות והפירוט שלהם בזמן אמת
         [HttpGet]
         public async Task<IEnumerable<MissionManagement>> GetAllMissionsProposal()
         {
@@ -39,10 +40,19 @@ namespace FinalProject_APIServer.Controllers
                 mis.Position = mission.Target.Position;
                 mis.Xtarget = mission.Target.Location.X;
                 mis.Ytarget = mission.Target.Location.Y;
-                mis.distanc = _servtomis.Distance(mission.Target.Location.X, mission.Agent.Location.X, mission.Target.Location.Y, mission.Agent.Location.Y);
-                mis.Time_left = 50;
-                mis.Status = mission.Status;
 
+                if (mission.Status == "Ended")
+                {
+                    mis.distanc = 0;
+                    mis.Time_left = 0;
+                }
+                else
+                {
+                    mis.distanc = _servtomis.Distance(mission.Target.Location.X, mission.Agent.Location.X, mission.Target.Location.Y, mission.Agent.Location.Y);
+                    mis.Time_left = _servtomis.DistanceTime(mission.Target.Location.X, mission.Agent.Location.X, mission.Target.Location.Y, mission.Agent.Location.Y);
+                    
+                }
+                mis.Status = mission.Status;
                 missions.Add(mis);
 
             }
@@ -73,10 +83,11 @@ namespace FinalProject_APIServer.Controllers
                     //כאן משנה את הסטטוס של שניהם
                     mission.Status = Enums.StatusMission.Conected_to_mission.ToString();
                     mission.Agent.Status = Enums.StatusAgent.In_Activity.ToString();
+                    mission.Target.Status = Enums.StatusTarget.Mitzvah.ToString();
                     _dbcontext.SaveChanges();
                     await _servtomis.RemoveMission(mission);
                 }
-                _dbcontext.SaveChanges();
+                await _dbcontext.SaveChangesAsync();
             }
         }
 
