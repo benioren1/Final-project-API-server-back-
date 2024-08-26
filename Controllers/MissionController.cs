@@ -23,17 +23,37 @@ namespace FinalProject_APIServer.Controllers
         }
 
         [HttpGet]
-        public async Task<IEnumerable<Mission>> GetAllMissionsProposal()
+        public async Task<IEnumerable<MissionManagement>> GetAllMissionsProposal()
         {
+            var listmission = await _dbcontext.missions.Include(a=>a.Agent).ThenInclude(l=>l.Location).Include(t=>t.Target).ThenInclude(l=>l.Location).ToListAsync();
+            List<MissionManagement> missions = new List<MissionManagement>();
+            foreach (var mission in listmission)
+            {
 
-            return await _dbcontext.missions.Include(a => a.Agent).ThenInclude(l => l.Location).Include(t=>t.Target).ThenInclude(t => t.Location).Where(s=>s.Status == Enums.StatusMission.Proposal.ToString()).ToListAsync();
+                MissionManagement mis= new MissionManagement();
+                mis.Id_MIssion = mission.Id;
+                mis.AgentName = mission.Agent.Nickname;
+                mis.Xagent = mission.Agent.Location.X;
+                mis.Yagent = mission.Agent.Location.Y;
+                mis.TargetName = mission.Target.Name;
+                mis.Position = mission.Target.Position;
+                mis.Xtarget = mission.Target.Location.X;
+                mis.Ytarget = mission.Target.Location.Y;
+                mis.distanc = _servtomis.Distance(mission.Target.Location.X, mission.Agent.Location.X, mission.Target.Location.Y, mission.Agent.Location.Y);
+                mis.Time_left = 50;
+                mis.Status = mission.Status;
 
+                missions.Add(mis);
+
+            }
+
+            return missions;
         }
 
 
         // משנה סטטוס של משימה לפעילה ומצוותת
         [HttpPut("{id}")]
-
+        
         public async Task ChangeStatus(int id)
         { 
         

@@ -1,4 +1,6 @@
 using FinalProject_APIServer.DAL;
+using FinalProject_APIServer.Middelware;
+using FinalProject_APIServer.Middelware.Global;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,6 +26,17 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseWhen(
+    context =>
+    !context.Request.Path.StartsWithSegments("/Login"),
+    appbuilder =>
+    {
+        appbuilder.UseMiddleware<JWTvalidation>();
+    }
+
+
+    );
+
 
 app.UseAuthorization();
 

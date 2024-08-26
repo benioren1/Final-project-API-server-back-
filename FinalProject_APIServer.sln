@@ -5,6 +5,8 @@ VisualStudioVersion = 17.10.35027.167
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FinalProject_APIServer", "FinalProject_APIServer.csproj", "{612D1661-AB2C-42B8-AEB8-3B37C39D9109}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IronDomeAPI", "..\..\..\Users\benio\source\repos\IronDomeAPI\IronDomeAPI\IronDomeAPI.csproj", "{AA380168-AC52-4FE0-A66A-AE1C8928DC45}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{612D1661-AB2C-42B8-AEB8-3B37C39D9109}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{612D1661-AB2C-42B8-AEB8-3B37C39D9109}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{612D1661-AB2C-42B8-AEB8-3B37C39D9109}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AA380168-AC52-4FE0-A66A-AE1C8928DC45}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AA380168-AC52-4FE0-A66A-AE1C8928DC45}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AA380168-AC52-4FE0-A66A-AE1C8928DC45}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AA380168-AC52-4FE0-A66A-AE1C8928DC45}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

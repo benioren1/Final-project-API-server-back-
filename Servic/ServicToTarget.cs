@@ -121,11 +121,14 @@ namespace FinalProject_APIServer.Servic
             }
         }
 
+        //פפונקציה לחישוב מרחק בין נקודות
         public double Distance(int x, int x1, int y, int y1)
         {
             return Math.Sqrt(Math.Pow(x - x1, 2) + Math.Pow(y - y1, 2));
 
         }
+
+        //פונקציה להוזיז מטרה
         public async Task MoveTarget(Target target)
         {
 
@@ -139,12 +142,13 @@ namespace FinalProject_APIServer.Servic
 
                     if (mission.Target.Id == target.Id)
                     {
+                        //בדיקה האם הסוכן יצא מטווח ה200
                         double result = Distance(target.Location.X, mission.Agent.Location.X, target.Location.Y, mission.Agent.Location.Y);
 
                         if (result > 200)
                         {
                             _dbcontext.missions.Remove(mission);
-                            _dbcontext.SaveChanges();
+                           await _dbcontext.SaveChangesAsync();
 
                         }
                     }
@@ -153,6 +157,8 @@ namespace FinalProject_APIServer.Servic
             await TaskForceCheck(target);
 
         }
+
+        //בדיקת חריגה מהגבולת של המטריצה
         public async Task<bool> OutOfRAnge(Target target)
         {
             if (target.x > 1000 || target.y > 1000 || target.y < 0 || target.x <0)

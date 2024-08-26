@@ -128,7 +128,8 @@ namespace FinalProject_APIServer.Servic
                         Status = Enums.StatusMission.Proposal.ToString(),
                     };
                     _dbcontext.missions.Add(newmission);
-                    _dbcontext.SaveChanges();
+                    _dbcontext.missions.Update(newmission);
+                   
                 }
                 if (mission != null && mission.Status == Enums.StatusMission.Proposal.ToString() && mission.Target.Id != thistarget.Id)
                 {
@@ -139,7 +140,8 @@ namespace FinalProject_APIServer.Servic
                         Status = Enums.StatusMission.Proposal.ToString(),
                     };
                     _dbcontext.missions.Add(newmission);
-                    _dbcontext.SaveChanges();
+                    _dbcontext.missions.Update(newmission);
+                   await _dbcontext.SaveChangesAsync();
 
                 }
             }
@@ -162,12 +164,13 @@ namespace FinalProject_APIServer.Servic
                         if (Distance(agent.Location.X, mission.Target.x, agent.Location.Y, mission.Target.y) > 200)
                         {
                             _dbcontext.missions.Remove(mission);
-                            _dbcontext.SaveChanges();
+                           
 
                         }
                     }
                 }
             }
+            await _dbcontext.SaveChangesAsync();
             await TaskForceCheck(agent);
 
         }

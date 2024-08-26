@@ -11,13 +11,14 @@ namespace FinalProject_APIServer.Servic
         private readonly FinalProjectDbContext _dbcontext;
 
 
-
+        // פה אני מזריק db 
         public ServicToMission(FinalProjectDbContext freindcontext)
         {
             _dbcontext = freindcontext;
 
         }
 
+        //פונקציה שמשתמשת בעוד פונקציות לצורך הוזזה של סוכן כאן היא מביאה רשימה של משימות רלוונטיות 
         public async Task MoveMission()
         {
             var missions = await _dbcontext.missions
@@ -34,7 +35,7 @@ namespace FinalProject_APIServer.Servic
             }
         }
 
-
+        //פונקציה שמזיזה את הסוכן לכיוון המטרה 
         public async Task MoveMission1(Target target, Agent agent)
         {
             if (target.Location != null && agent.Location != null)
@@ -50,9 +51,6 @@ namespace FinalProject_APIServer.Servic
                     
                  
             }
-            
-            target.x = target.Location.X;
-            target.y = target.Location.Y;
             agent .X = agent.Location.X;
             agent.Y = agent.Location.Y;
             _dbcontext.Update(agent);
@@ -60,12 +58,14 @@ namespace FinalProject_APIServer.Servic
             await _dbcontext.SaveChangesAsync();
         }
 
+        //פונקציה שבודקת מרחק בין נקודות במטריצה
         public double Distance(int x, int x1, int y, int y1)
         {
             return Math.Sqrt(Math.Pow(x - x1, 2) + Math.Pow(y - y1, 2));
 
         }
 
+        //בדיקה האם המטרה חוסלה
         public async Task FinishTheMission(Mission mission)
         {
             if (mission.Agent.Location != null && mission.Target.Location != null)
@@ -77,7 +77,6 @@ namespace FinalProject_APIServer.Servic
                     mission.Status = Enums.StatusMission.Ended.ToString();
                     mission.Target.Status = Enums.StatusTarget.Eliminated.ToString();
                     mission.Agent.Status = Enums.StatusAgent.Dormant.ToString();
-                    mission.At_Time = DateTime.Now;
                 }
               
             }
@@ -86,6 +85,7 @@ namespace FinalProject_APIServer.Servic
             await _dbcontext.SaveChangesAsync();
         }
 
+        // מחיקת כל המשימות הלא רלוונטיות יותר 
         public async Task RemoveMission(Mission mission)
         { 
             var missions =await _dbcontext.missions.Include(a => a.Agent).Include(t=>t.Target).Where(t=> t.Status == Enums.StatusMission.Proposal.ToString()).ToListAsync();
@@ -97,6 +97,7 @@ namespace FinalProject_APIServer.Servic
                     _dbcontext.missions.Remove(missionn);
                 }
             }
+            _dbcontext.Update(mission);
             await _dbcontext.SaveChangesAsync() ;
         
         }

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Mono.TextTemplating;
 using FinalProject_APIServer.Servic;
 using Microsoft.EntityFrameworkCore;
+using NuGet.Common;
 
 namespace FinalProject_APIServer.Controllers
 {
@@ -118,9 +119,13 @@ namespace FinalProject_APIServer.Controllers
         }
 
 
+    //    var token = HttpContext.Items["Token"] as string;
+    //        if (string.IsNullOrEmpty(token))
+    //        {
+    //            return Unauthorized("Token is required");
+    //}
 
 
 
-
-    }
+}
 }
