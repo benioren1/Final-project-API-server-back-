@@ -36,15 +36,15 @@ namespace FinalProject_APIServer.Controllers
                     }
 
                     ),
-                Expires = DateTime.Now.AddSeconds(30),
+                Expires = DateTime.Now.AddSeconds(160),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key),
                 SecurityAlgorithms.HmacSha256Signature
 
                 )
             };
-            
+
             var token = tokenhendler.CreateToken(tokenDescriptor);
-            
+
             var tokenString = tokenhendler.WriteToken(token);
 
             return tokenString;
@@ -56,44 +56,19 @@ namespace FinalProject_APIServer.Controllers
         [HttpPost]
         public IActionResult Login(Loggin loggin)
         {
-            if (loggin.id == "Mvc")
-            {
-
-                string userIP = HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString();
 
 
-                UserTokens[loggin.id] = GenerateToken(userIP);
+            string userIP = HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString();
 
-                return StatusCode(200
-                    , new { token = GenerateToken(userIP) }
-                    );
-            }
-            return StatusCode(StatusCodes.Status401Unauthorized,
-                    new { error = "invalid credentials" });
+
+            UserTokens[loggin.id] = GenerateToken(userIP);
+
+            return StatusCode(200
+                , new { token = GenerateToken(userIP) }
+                );
+            
+
+
         }
-
-
-        //[HttpPost]
-        //public async  Task< IActionResult> Login( Loggin request)
-        //{
-        //    if (request == null || string.IsNullOrEmpty(request.Username) || string.IsNullOrEmpty(request.Password))
-        //    {
-        //        return BadRequest("Invalid request");
-        //    }
-
-        //    if (request.Username == "user" && request.Password == "password")
-        //    {
-
-        //        var token = Guid.NewGuid().ToString();
-        //        UserTokens[request.Username] = token; 
-
-
-        //        return Ok(new { Token = token });
-        //    }
-
-        //    return Unauthorized();
-        //}
-
-
     }
 }

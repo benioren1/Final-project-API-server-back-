@@ -70,6 +70,12 @@ namespace FinalProject_APIServer.Servic
                         x_x -= 1;
                         break;
                     }
+                default:
+                    {
+                        y_y += 0;
+                        x_x -= 0;
+                        break;
+                    }
 
             }
 
@@ -112,39 +118,41 @@ namespace FinalProject_APIServer.Servic
                         }
                     }
                 }
-            }
-            if (thistarget != null)
-            {
-
-                Mission? mission = _dbcontext.missions.FirstOrDefault(p => p.Target.Id == thistarget.Id);
-                if (mission == null)
-
+                if (thistarget != null)
                 {
 
-                    Mission newmission = new Mission()
-                    {
-                        Agent = agnet,
-                        Target = thistarget,
-                        Status = Enums.StatusMission.Proposal.ToString(),
-                    };
-                    _dbcontext.missions.Add(newmission);
-                    _dbcontext.missions.Update(newmission);
-                   
-                }
-                if (mission != null && mission.Status == Enums.StatusMission.Proposal.ToString() && mission.Target.Id != thistarget.Id)
-                {
-                    Mission newmission = new Mission()
-                    {
-                        Agent = agnet,
-                        Target = thistarget,
-                        Status = Enums.StatusMission.Proposal.ToString(),
-                    };
-                    _dbcontext.missions.Add(newmission);
-                    _dbcontext.missions.Update(newmission);
-                   await _dbcontext.SaveChangesAsync();
+                    Mission? mission = _dbcontext.missions.FirstOrDefault(p => p.Target.Id == thistarget.Id);
+                    if (mission == null)
 
+                    {
+
+                        Mission newmission = new Mission()
+                        {
+                            Agent = agnet,
+                            Target = thistarget,
+                            Status = Enums.StatusMission.Proposal.ToString(),
+                        };
+                       await _dbcontext.missions.AddAsync(newmission);
+
+
+                    }
+                    if (mission != null && mission.Status == Enums.StatusMission.Proposal.ToString() && mission.Target.Id != thistarget.Id)
+                    {
+                        Mission newmission = new Mission()
+                        {
+                            Agent = agnet,
+                            Target = thistarget,
+                            Status = Enums.StatusMission.Proposal.ToString(),
+                        };
+                       await _dbcontext.missions.AddAsync(newmission);
+
+                       
+
+                    }
                 }
             }
+            await _dbcontext.SaveChangesAsync();
+
         }
 
         public async Task MoveAgent(Agent agent)

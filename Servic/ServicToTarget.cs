@@ -99,26 +99,27 @@ namespace FinalProject_APIServer.Servic
                         thisagent = agent;
                     }
                 }
-            }
-
-            if (thisagent != null)
-            {
-                Mission? mission = await _dbcontext.missions
-                    .FirstOrDefaultAsync(i => i.Target.Id == target.Id && i.Agent.id == thisagent.id);
-
-                if (mission == null)
+                if (thisagent != null)
                 {
-                    Mission newmission = new Mission()
+                    Mission? mission = await _dbcontext.missions
+                        .FirstOrDefaultAsync(i => i.Target.Id == target.Id && i.Agent.id == thisagent.id);
+
+                    if (mission == null)
                     {
-                        Agent = thisagent,
-                        Target = target,
-                        Status = Enums.StatusMission.Proposal.ToString(),
-                    };
-                    await _dbcontext.missions.AddAsync(newmission);
-                    _dbcontext.Update(newmission);
-                    await _dbcontext.SaveChangesAsync();
+                        Mission newmission = new Mission()
+                        {
+                            Agent = thisagent,
+                            Target = target,
+                            Status = Enums.StatusMission.Proposal.ToString(),
+                        };
+                        await _dbcontext.missions.AddAsync(newmission);
+                        
+                       
+                    }
                 }
             }
+            await _dbcontext.SaveChangesAsync();
+
         }
 
         //פפונקציה לחישוב מרחק בין נקודות

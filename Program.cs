@@ -26,16 +26,16 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseWhen(
-    context =>
-    !context.Request.Path.StartsWithSegments("/Login"),
-    appbuilder =>
-    {
-        appbuilder.UseMiddleware<JWTvalidation>();
-    }
+//app.UseWhen(
+//    context =>
+//    !context.Request.Path.StartsWithSegments("/Login"),
+//    appbuilder =>
+//    {
+//        appbuilder.UseMiddleware<JWTvalidation>();
+//    }
 
 
-    );
+//    );
 
 
 app.UseAuthorization();

@@ -59,16 +59,17 @@ namespace FinalProject_APIServer.Controllers
                     thisagent.Location = loc;
                     thisagent.X = thisagent.Location.X;
                     thisagent.Y = thisagent.Location.Y;
-                    _dbcontext.locations.Add(loc);
-                    await _dbcontext.SaveChangesAsync();
 
-
-                    await _servtoagent.TaskForceCheck(thisagent);
+                    if (thisagent.X >= 0 && thisagent.Y >= 0)
+                    {
+                        _dbcontext.locations.Add(loc);
+                        await _dbcontext.SaveChangesAsync();
+                        //שליחה של הסוכן לבדיקה של האיזור שלו לביצוע חיבור משימה
+                        await _servtoagent.TaskForceCheck(thisagent);
+                    }
+                    
                 }
             }
-                
-
-
          
             return StatusCode(StatusCodes.Status200OK, thisagent);
 
@@ -81,9 +82,9 @@ namespace FinalProject_APIServer.Controllers
         {
             Agent? thisagent = _dbcontext.agnets.Include(t => t.Location).FirstOrDefault(att => att.id == id);
 
-            
-
+            //תןפס את כיוון תזוזת הסוכן
             string Direction = moveone.direction;
+
             if (thisagent != null)
             {
                 if (await _servtoagent.OutOfRAnge(thisagent))
