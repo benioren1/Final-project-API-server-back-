@@ -108,7 +108,8 @@ namespace FinalProject_APIServer.Servic
 
             foreach (var target in listoftargets)
             {
-                if (target.Status == "Live" && target.Location != null && agnet.Location != null)
+                
+                if (target.Status == "Live" && target.Location != null && target.Location.X >= 0 && agnet.Location!=null && agnet.Location.X >= 0)
                 {
 
                     double distance = Math.Sqrt(Math.Pow(agnet.Location.X - target.Location.X, 2) + Math.Pow(agnet.Location.Y - target.Location.Y, 2));
