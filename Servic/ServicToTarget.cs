@@ -89,7 +89,7 @@ namespace FinalProject_APIServer.Servic
 
             foreach (var agent in listofagents)
             {
-                if (agent.Status == "Dormant" && agent.X != 0 && agent.Y != 0)
+                if (agent.Status == "Dormant" && agent.Location != null && target.Location != null)
                 {
                     double distance = Math.Sqrt(Math.Pow(target.Location.X - agent.Location.X, 2) + Math.Pow(target.Location.Y - agent.Location.Y, 2));
 

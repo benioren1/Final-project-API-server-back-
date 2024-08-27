@@ -34,7 +34,7 @@ namespace FinalProject_APIServer.Controllers
         public async Task<IEnumerable<Target>> GetAllTargets()
         {
 
-            return _dbcontext.targets.ToList();
+            return await _dbcontext.targets.ToListAsync();
 
         }
 

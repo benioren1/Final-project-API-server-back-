@@ -207,19 +207,22 @@ namespace FinalProject_APIServer.Servic
             { 
             
             ViewAgent viewAgent = new ViewAgent();
-                viewAgent.id = agent.id;
-                viewAgent.Nickname = agent.Nickname;
-                viewAgent.X = agent.Location.X;
-                viewAgent.Y = agent.Location.Y;
-                viewAgent.Status = agent.Status;
-                if(agent.Status == "In_Activity")
+                if (agent.Location != null && agent.Location != null)
                 {
-                    var mission = await _dbcontext.missions.Include(a => a.Agent).ThenInclude(l => l.Location).Include(t => t.Target).ThenInclude(l => l.Location).FirstOrDefaultAsync(i => i.Agent.id == agent.id);
-                    viewAgent.Time_left = DistanceTime(mission.Target.Location.X, mission.Agent.Location.X, mission.Target.Location.Y, mission.Agent.Location.Y);
+                    viewAgent.id = agent.id;
+                    viewAgent.Nickname = agent.Nickname;
+                    viewAgent.X = agent.Location.X;
+                    viewAgent.Y = agent.Location.Y;
+                    viewAgent.Status = agent.Status;
+                    if (agent.Status == "In_Activity")
+                    {
+                        var mission = await _dbcontext.missions.Include(a => a.Agent).ThenInclude(l => l.Location).Include(t => t.Target).ThenInclude(l => l.Location).FirstOrDefaultAsync(i => i.Agent.id == agent.id);
+                        viewAgent.Time_left = DistanceTime(mission.Target.Location.X, mission.Agent.Location.X, mission.Target.Location.Y, mission.Agent.Location.Y);
+                    }
+                    var mission1 = _dbcontext.missions.Include(a => a.Agent).ThenInclude(l => l.Location).Include(t => t.Target).ThenInclude(l => l.Location).Where(i => i.Agent.id == agent.id && i.Status == "Ended").Count();
+                    viewAgent.Amount_Of_Eliminations = mission1;
+                    agentss.Add(viewAgent);
                 }
-                var mission1 =  _dbcontext.missions.Include(a => a.Agent).ThenInclude(l => l.Location).Include(t => t.Target).ThenInclude(l => l.Location).Where(i => i.Agent.id == agent.id && i.Status == "Ended").Count();
-                viewAgent.Amount_Of_Eliminations = mission1;
-                agentss.Add(viewAgent);
             }
             return agentss;
         }
